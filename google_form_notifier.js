@@ -1,18 +1,8 @@
-/**
- * GoogleFormNotifier
- * ==================
- *
- * TODO. Include:
- *
- *   - How to include this and dependencies in Google Apps Script
- *   - How to include this and dependencies in Google Apps Script
- *
- */
 (function() {
 
   GoogleFormNotifier = {
-    "_htmlTemplate":undefined,
-    "_textTemplate":undefined
+    _htmlTemplate:undefined,
+    _textTemplate:undefined
   };
 
   /**
@@ -47,9 +37,9 @@
     var textBody = this._render(this._transformNamedValues(evt.namedValues), this.textTemplate());
     if (mailOptions === undefined) {
       mailOptions = {
-        "bcc": recipients.join(","),
-        "replyTo": username,
-        "htmlBody": htmlBody
+        bcc: recipients.join(","),
+        replyTo: username,
+        htmlBody: htmlBody
       };
     }
     MailApp.sendEmail(username, subject, textBody, mailOptions);
@@ -137,7 +127,7 @@
     var ret = [];
     for (prop in namedValues) {
       if (namedValues.hasOwnProperty(prop)) {
-        ret.push({"column":prop, "value":namedValues[prop]});
+        ret.push({column:prop, value:namedValues[prop]});
       }
     }
     return {"formData":ret};

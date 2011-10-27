@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>google_form_notifier.js</title>
+  <link rel="stylesheet" href="http://jashkenas.github.com/docco/resources/docco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <table cellspacing=0 cellpadding=0>
+  <thead>
+    <tr>
+      <th class=docs><h1>google_form_notifier.js</h1></th>
+      <th class=code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr id='section-1'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-1">&#182;</a>
+        </div>
+        
+      </td>
+      <td class=code>
+        <div class='highlight'><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+  <span class="nx">GoogleFormNotifier</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">_htmlTemplate</span><span class="o">:</span><span class="kc">undefined</span><span class="p">,</span>
+    <span class="nx">_textTemplate</span><span class="o">:</span><span class="kc">undefined</span>
+  <span class="p">};</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-notify()'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-notify()">&#182;</a>
+        </div>
+        <h2>notify()</h2>
+
+<p>This is the main function of this script. It excpects the event object for
+a form submission (&lsquo;On form submit&rsquo; trigger). Call this method in your 
+Google Apps script:</p>
+
+<pre><code>function onSubmit(evt) {
+  GoogleFormNotifier.notify(evt);
+}
+</code></pre>
+
+<p>Optionally, you can pass in and extra <code>mailOptions</code> parameter for more
+control over how your message is sent. The <code>mailOptions</code> object is the
+same as the <code>mailOptions</code> object for the <code>MailApp</code> Google class.</p>
+
+<pre><code>function onSubmit(evt) {
+  var mailOptions = {&ldquo;noReply&rdquo;:true};
+  GoogleFormNotifier.notify(evt, mailOptions);
+}
+</code></pre>
+
+<p>Check out Google&rsquo;s <code>MailApp</code> class <a href="http://code.google.com/googleapps/appsscript/class_mailapp.html#sendEmail">documentation</a> for more examples.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">notify</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evt</span><span class="p">,</span> <span class="nx">mailOptions</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span><span class="p">[</span><span class="s2">&quot;Username&quot;</span><span class="p">].</span><span class="nx">toString</span><span class="p">();</span>
+    <span class="kd">var</span> <span class="nx">recipients</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getRecipients</span><span class="p">();</span>
+    <span class="kd">var</span> <span class="nx">subject</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getSubject</span><span class="p">();</span>
+    <span class="kd">var</span> <span class="nx">htmlBody</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_render</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_transformNamedValues</span><span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span><span class="p">),</span> <span class="k">this</span><span class="p">.</span><span class="nx">htmlTemplate</span><span class="p">());</span>
+    <span class="kd">var</span> <span class="nx">textBody</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_render</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_transformNamedValues</span><span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span><span class="p">),</span> <span class="k">this</span><span class="p">.</span><span class="nx">textTemplate</span><span class="p">());</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">mailOptions</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">mailOptions</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">bcc</span><span class="o">:</span> <span class="nx">recipients</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">),</span>
+        <span class="nx">replyTo</span><span class="o">:</span> <span class="nx">username</span><span class="p">,</span>
+        <span class="nx">htmlBody</span><span class="o">:</span> <span class="nx">htmlBody</span>
+      <span class="p">};</span>
+    <span class="p">}</span>
+    <span class="nx">MailApp</span><span class="p">.</span><span class="nx">sendEmail</span><span class="p">(</span><span class="nx">username</span><span class="p">,</span> <span class="nx">subject</span><span class="p">,</span> <span class="nx">textBody</span><span class="p">,</span> <span class="nx">mailOptions</span><span class="p">);</span>
+  <span class="p">};</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-htmlTemplate()'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-htmlTemplate()">&#182;</a>
+        </div>
+        <h2>htmlTemplate()</h2>
+
+<p>Gets and sets the <a href="http://www.handlebarsjs.com/">Handlebars</a> template for 
+the HTML email message body. A default template is supplied and can be 
+optionally overridden:</p>
+
+<pre><code>function onSubmit(evt) {
+  var customTemplate = &ldquo;&lt;h1&gt;A custom template!&lt;/h1&gt;&rdquo; +
+                       &ldquo;{{#formData}}&rdquo; + 
+                       &ldquo;  &lt;h2&gt;{{column}}&lt;/h2&gt;&rdquo; +
+                       &ldquo;  &lt;p&gt;{{value}}&lt;/p&gt;&rdquo; +
+                       &ldquo;{{/formData}}&rdquo;;
+  GoogleFormNotifier.htmlTemplate(customTemplate);
+  GoogleFormNotifier.notify(evt);
+}
+</code></pre>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">htmlTemplate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">template</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_htmlTemplate</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">_htmlTemplate</span> <span class="o">=</span> <span class="s2">&quot;&lt;h1&gt;&quot;</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getSubject</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;&lt;/h1&gt;&lt;hr /&gt;{{#formData}}&lt;h2 style=\&quot;font-size:12px;margin:20px 0 5px 0;\&quot;&gt;{{column}}&lt;/h2&gt;&lt;p style=\&quot;padding:4px;border:1px solid #ccc;background:#e9e9e9;color:#333;\&quot;&gt;{{value}}&lt;/p&gt;{{/formData}}&quot;</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">_htmlTemplate</span> <span class="o">=</span> <span class="nx">template</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_htmlTemplate</span><span class="p">;</span>
+  <span class="p">}</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-textTemplate()'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-textTemplate()">&#182;</a>
+        </div>
+        <h2>textTemplate()</h2>
+
+<p>Gets and sets the <a href="http://www.handlebarsjs.com/">Handlebars</a> template for 
+the plaintext email message body (Google requires a fallback for HTML 
+emails). Works just like the <code>htmlTemplate</code>:</p>
+
+<pre><code>function onSubmit(evt) {
+  var customTemplate = &ldquo;A plaintext template&rdquo; +
+                       &ldquo;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&rdquo; +
+                       &ldquo;{{#formData}}&rdquo; + 
+                       &ldquo;  {{column}}: {{value}}&rdquo; +
+                       &ldquo;{{/formData}}&rdquo;;
+  GoogleFormNotifier.textTemplate(customTemplate);
+  GoogleFormNotifier.notify(evt);
+}
+</code></pre>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">textTemplate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">template</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">template</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_textTemplate</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">_textTemplate</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getSubject</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;\n\n{{#formData}}{{column}}:{{value}}\n\n{{/formData}}&quot;</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">_textTemplate</span> <span class="o">=</span> <span class="nx">template</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_textTemplate</span><span class="p">;</span>
+  <span class="p">}</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-_transformNamedValues()'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-_transformNamedValues()">&#182;</a>
+        </div>
+        <h2>_transformNamedValues()</h2>
+
+<p>A private helper method that adds keys to <code>evt.namedValues</code> object so it
+can be used by a Handlebars template.</p>
+
+<p>Turns</p>
+
+<pre><code>{namedValues:{&ldquo;Some column name&rdquo;:&ldquo;Some value a user entered}}
+</code></pre>
+
+<p>into:</p>
+
+<pre><code>{formData:[{column:&quot;Some column name&rdquo;,value:&ldquo;Some value a user entered}]}
+</code></pre>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">_transformNamedValues</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">namedValues</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">ret</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nx">prop</span> <span class="k">in</span> <span class="nx">namedValues</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">namedValues</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">prop</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nx">ret</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="nx">column</span><span class="o">:</span><span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span><span class="o">:</span><span class="nx">namedValues</span><span class="p">[</span><span class="nx">prop</span><span class="p">]});</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;formData&quot;</span><span class="o">:</span><span class="nx">ret</span><span class="p">};</span>
+  <span class="p">};</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-_getRecipients()'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-_getRecipients()">&#182;</a>
+        </div>
+        <h2>_getRecipients()</h2>
+
+<p>A private helper method that grabs email addresses out of
+<code>Notification list</code> sheet of the form&rsquo;s spreadsheet. Returns an array of
+email addresses.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">_getRecipients</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">sheetName</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">sheetName</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">sheetName</span> <span class="o">=</span> <span class="s2">&quot;Notification list&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="kd">var</span> <span class="nx">sheet</span> <span class="o">=</span> <span class="nx">SpreadsheetApp</span><span class="p">.</span><span class="nx">getActiveSpreadsheet</span><span class="p">().</span><span class="nx">getSheetByName</span><span class="p">(</span><span class="nx">sheetName</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">dataRange</span> <span class="o">=</span> <span class="nx">sheet</span><span class="p">.</span><span class="nx">getDataRange</span><span class="p">();</span> <span class="c1">// Get Range with active data</span>
+    <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">dataRange</span><span class="p">.</span><span class="nx">getValues</span><span class="p">();</span> <span class="c1">// Fetch values for each row in the Range.</span>
+    <span class="kd">var</span> <span class="nx">emailList</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nx">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="nx">i</span><span class="o">&lt;</span><span class="nx">data</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span><span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// This assumes you have a title row and starts at 1</span>
+      <span class="kd">var</span> <span class="nx">row</span> <span class="o">=</span> <span class="nx">data</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+      <span class="kd">var</span> <span class="nx">emailAddress</span> <span class="o">=</span> <span class="nx">row</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>  <span class="c1">// First column</span>
+      <span class="nx">emailList</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">emailAddress</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">emailList</span><span class="p">;</span>
+  <span class="p">};</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-_getSubject()'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-_getSubject()">&#182;</a>
+        </div>
+        <h2>_getSubject()</h2>
+
+<p>A private helper method that builds a subject line for the email message.
+If the spreadsheet is named &quot;Some cool spreadsheet&rdquo;, this method would
+return &ldquo;A &lsquo;Some cool spreadsheet&rsquo; form has been submitted&rdquo;.</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">_getSubject</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">spreadsheetName</span> <span class="o">=</span> <span class="nx">SpreadsheetApp</span><span class="p">.</span><span class="nx">getActiveSpreadsheet</span><span class="p">().</span><span class="nx">getName</span><span class="p">();</span>
+    <span class="kd">var</span> <span class="nx">article</span> <span class="o">=</span> <span class="s2">&quot;A&quot;</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">pattern</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="sr">/^[aeiouy]/i</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">pattern</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">spreadsheetName</span><span class="p">))</span> <span class="p">{</span>
+      <span class="nx">article</span> <span class="o">=</span> <span class="s2">&quot;An&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">article</span> <span class="o">+</span> <span class="s2">&quot; &#39;&quot;</span> <span class="o">+</span> <span class="nx">spreadsheetName</span> <span class="o">+</span> <span class="s2">&quot;&#39; form has been submitted&quot;</span><span class="p">;</span>
+  <span class="p">}</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-_render()'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-_render()">&#182;</a>
+        </div>
+        <h2>_render()</h2>
+
+<p>A private helper method that renders a Handlebars template. It returns
+the rendered content.</p>
+
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">_render</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">template</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">compiledTemplate</span> <span class="o">=</span> <span class="nx">Handlebars</span><span class="p">.</span><span class="nx">compile</span><span class="p">(</span><span class="nx">template</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">rendered</span> <span class="o">=</span> <span class="nx">compiledTemplate</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nx">rendered</span><span class="p">;</span>
+  <span class="p">}</span>
+
+<span class="p">})();</span></pre></div>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
