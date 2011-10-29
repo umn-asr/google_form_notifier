@@ -63,7 +63,9 @@ TODO
  - [DONE] Column order: namedValues is a hash, which doesn't preserve order.
    Possible solution is to reflect on the spreadsheet and use the column
    order.
- - Right now the 'collect username' form option is required (we use
+ - [DONE] Right now the 'collect username' form option is required (we use
    `namedValues` object which is only present when username is collected?!)
  - [DONE] Include dependencies
  - Create some simple unit tests?
+ - Find a graceful way to set the 'to' address or change the bcc
+   notification scheme if not respondent username is collected.

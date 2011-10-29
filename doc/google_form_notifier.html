@@ -60,13 +60,19 @@ same as the <code>mailOptions</code> object for the <code>MailApp</code> Google 
 </code></pre>
 
 <p>Check out Google&rsquo;s <code>MailApp</code> class <a href="http://code.google.com/googleapps/appsscript/class_mailapp.html#sendEmail">documentation</a> for more examples.</p>
+
+<p>If your form is collecting the repondents' usernames, the email
+notification will be sent to the responent with the notification liest
+blind copied. If your form does not collect usernames, the notification
+will be sent to the owner of the spreadsheet with the notification list
+blind copied.</p>
       </td>
       <td class=code>
         <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">notify</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evt</span><span class="p">,</span> <span class="nx">mailOptions</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">throw</span> <span class="s2">&quot;GoogleFormNotifier: You must check the &#39;Automatically collect respondent&#39;s username&#39; on the form&quot;</span>
+    <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="nx">SpreadsheetApp</span><span class="p">.</span><span class="nx">getActiveSpreadsheet</span><span class="p">().</span><span class="nx">getOwner</span><span class="p">().</span><span class="nx">getEmail</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span><span class="p">[</span><span class="s2">&quot;Username&quot;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">username</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span><span class="p">[</span><span class="s2">&quot;Username&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">];</span>
     <span class="p">}</span>
-    <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span><span class="p">[</span><span class="s2">&quot;Username&quot;</span><span class="p">].</span><span class="nx">toString</span><span class="p">();</span>
     <span class="kd">var</span> <span class="nx">recipients</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getRecipients</span><span class="p">();</span>
     <span class="kd">var</span> <span class="nx">subject</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getSubject</span><span class="p">();</span>
     <span class="kd">var</span> <span class="nx">htmlBody</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_render</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">_transformNamedValues</span><span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span><span class="p">),</span> <span class="k">this</span><span class="p">.</span><span class="nx">htmlTemplate</span><span class="p">());</span>

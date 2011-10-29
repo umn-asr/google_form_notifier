@@ -29,12 +29,18 @@
    *
    * Check out Google's `MailApp` class [documentation](http://code.google.com/googleapps/appsscript/class_mailapp.html#sendEmail) for more examples.
    *
+   * If your form is collecting the repondents' usernames, the email
+   * notification will be sent to the responent with the notification liest
+   * blind copied. If your form does not collect usernames, the notification
+   * will be sent to the owner of the spreadsheet with the notification list
+   * blind copied.
+   *
    */
   GoogleFormNotifier.notify = function(evt, mailOptions) {
-    if (evt.namedValues === undefined) {
-      throw "GoogleFormNotifier: You must check the 'Automatically collect respondent's username' on the form"
+    var username = SpreadsheetApp.getActiveSpreadsheet().getOwner().getEmail();
+    if (evt.namedValues["Username"] !== undefined) {
+      username = evt.namedValues["Username"][0];
     }
-    var username = evt.namedValues["Username"].toString();
     var recipients = this._getRecipients();
     var subject = this._getSubject();
     var htmlBody = this._render(this._transformNamedValues(evt.namedValues), this.htmlTemplate());
