@@ -169,7 +169,7 @@
     var dataRange = sheet.getDataRange(); // Get Range with active data
     var data = dataRange.getValues(); // Fetch values for each row in the Range.
     var emailList = [];
-    for (i=1;i<data.length;i++) { // This assumes you have a title row and starts at 1
+    for (i=1;i<data.length;i++) {
       var row = data[i];
       var emailAddress = row[0];  // First column
       emailList.push(emailAddress);
