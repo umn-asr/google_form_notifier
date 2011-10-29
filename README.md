@@ -17,14 +17,33 @@ they're available before including this script.
 Usage
 -----
 
-To use this script, place it on a web server that you control and include it
-into your Google Apps script like so:
+To use this script, place it on a web server that you control or trust (notice
+the `eval`) and include it into your Google Apps script like so:
 
-    eval(UrlFetchApp.fetch('http://example.com/underscore-min.js').getContentText());
-    eval(UrlFetchApp.fetch('http://example.com/handlebars.1.0.0.beta.3.js').getContentText());
+    eval(UrlFetchApp.fetch('http://example.com/lib/underscore-min.js').getContentText());
+    eval(UrlFetchApp.fetch('http://example.com/lib/handlebars.1.0.0.beta.3.js').getContentText());
     eval(UrlFetchApp.fetch('http://example.com/google_form_notifier.js').getContentText());
 
-Then, you can use the `GoogleFormNotifier` object:
+Google Apps authorization
+-------------------------
+
+Google Apps Script tries to parse out your script and asks for authoration to 
+perform certains tasks like sending email and reading the spreadsheet
+content. The first time you try to use this script, you'll have to
+fake-out Google by adding these lines and authorizing the functionality:
+
+      // Temporarily uncomment these lines to "authorize" the funcationality.
+      //
+      // SpreadsheetApp.getActiveSpreadsheet().getSheetByName("blah");
+      // MailApp.sendEmail("someone@example.com, "blah", "blah");
+      // Utilities.jsonStringify({"blah":"blahblah"});
+
+Click the 'Run' button in the script editor and Google will pop up a
+message to authorize the actions. Click 'authorize' and then comment
+these lines back out or delete them.
+
+After these functions have been authorized, you can use the `GoogleFormNotifier`
+object:
 
     function onSubmit(evt) {
       GoogleFormNotifier.notify(evt);
@@ -41,6 +60,10 @@ Apps' caching by adding a random number to the url string:
 TODO
 ----
 
- - Include dependencies
- - Create soem simple unit tests
- - Write something about the 'Authorization' step in Google Apps Script
+ - [DONE] Column order: namedValues is a hash, which doesn't preserve order.
+   Possible solution is to reflect on the spreadsheet and use the column
+   order.
+ - Right now the 'collect username' form option is required (we use
+   `namedValues` object which is only present when username is collected?!)
+ - [DONE] Include dependencies
+ - Create some simple unit tests?

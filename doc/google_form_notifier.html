@@ -27,6 +27,7 @@
         <div class='highlight'><pre><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 
   <span class="nx">GoogleFormNotifier</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nx">VERSION</span><span class="o">:</span><span class="s2">&quot;0.9.0&quot;</span><span class="p">,</span>
     <span class="nx">_htmlTemplate</span><span class="o">:</span><span class="kc">undefined</span><span class="p">,</span>
     <span class="nx">_textTemplate</span><span class="o">:</span><span class="kc">undefined</span>
   <span class="p">};</span></pre></div>
@@ -62,6 +63,9 @@ same as the <code>mailOptions</code> object for the <code>MailApp</code> Google 
       </td>
       <td class=code>
         <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">notify</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">evt</span><span class="p">,</span> <span class="nx">mailOptions</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">throw</span> <span class="s2">&quot;GoogleFormNotifier: You must check the &#39;Automatically collect respondent&#39;s username&#39; on the form&quot;</span>
+    <span class="p">}</span>
     <span class="kd">var</span> <span class="nx">username</span> <span class="o">=</span> <span class="nx">evt</span><span class="p">.</span><span class="nx">namedValues</span><span class="p">[</span><span class="s2">&quot;Username&quot;</span><span class="p">].</span><span class="nx">toString</span><span class="p">();</span>
     <span class="kd">var</span> <span class="nx">recipients</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getRecipients</span><span class="p">();</span>
     <span class="kd">var</span> <span class="nx">subject</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getSubject</span><span class="p">();</span>
@@ -158,7 +162,10 @@ emails). Works just like the <code>htmlTemplate</code>:</p>
         <h2>_transformNamedValues()</h2>
 
 <p>A private helper method that adds keys to <code>evt.namedValues</code> object so it
-can be used by a Handlebars template.</p>
+can be used by a Handlebars template. This method also attempts to correct
+the order of the columns by looking at the order of the columns in the
+spreadsheet. The namedValues object is not an array and therefore has no
+order.</p>
 
 <p>Turns</p>
 
@@ -173,10 +180,25 @@ can be used by a Handlebars template.</p>
       <td class=code>
         <div class='highlight'><pre>  <span class="nx">GoogleFormNotifier</span><span class="p">.</span><span class="nx">_transformNamedValues</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">namedValues</span><span class="p">)</span> <span class="p">{</span>
     <span class="kd">var</span> <span class="nx">ret</span> <span class="o">=</span> <span class="p">[];</span>
-    <span class="k">for</span> <span class="p">(</span><span class="nx">prop</span> <span class="k">in</span> <span class="nx">namedValues</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">columnCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></pre></div>
+      </td>
+    </tr>
+    <tr id='section-6'>
+      <td class=docs>
+        <div class="pilwrap">
+          <a class="pilcrow" href="#section-6">&#182;</a>
+        </div>
+        <p>count the number of columns</p>
+      </td>
+      <td class=code>
+        <div class='highlight'><pre>    <span class="k">for</span> <span class="p">(</span><span class="nx">prop</span> <span class="k">in</span> <span class="nx">namedValues</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">if</span> <span class="p">(</span><span class="nx">namedValues</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">prop</span><span class="p">))</span> <span class="p">{</span>
-        <span class="nx">ret</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="nx">column</span><span class="o">:</span><span class="nx">prop</span><span class="p">,</span> <span class="nx">value</span><span class="o">:</span><span class="nx">namedValues</span><span class="p">[</span><span class="nx">prop</span><span class="p">]});</span>
+        <span class="nx">columnCount</span><span class="o">++</span><span class="p">;</span>
       <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="kd">var</span> <span class="nx">header</span> <span class="o">=</span> <span class="nx">SpreadsheetApp</span><span class="p">.</span><span class="nx">getActiveSpreadsheet</span><span class="p">().</span><span class="nx">getSheets</span><span class="p">()[</span><span class="mi">0</span><span class="p">].</span><span class="nx">getRange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">columnCount</span><span class="p">).</span><span class="nx">getValues</span><span class="p">();</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nx">i</span> <span class="k">in</span> <span class="nx">header</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">{</span>
+      <span class="nx">ret</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="nx">column</span><span class="o">:</span><span class="nx">header</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="nx">i</span><span class="p">],</span> <span class="nx">value</span><span class="o">:</span><span class="nx">namedValues</span><span class="p">[</span><span class="nx">header</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="nx">i</span><span class="p">]]});</span>
     <span class="p">}</span>
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;formData&quot;</span><span class="o">:</span><span class="nx">ret</span><span class="p">};</span>
   <span class="p">};</span></pre></div>

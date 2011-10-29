@@ -1,6 +1,7 @@
 (function() {
 
   GoogleFormNotifier = {
+    VERSION:"0.9.0",
     _htmlTemplate:undefined,
     _textTemplate:undefined
   };
@@ -30,6 +31,9 @@
    *
    */
   GoogleFormNotifier.notify = function(evt, mailOptions) {
+    if (evt.namedValues === undefined) {
+      throw "GoogleFormNotifier: You must check the 'Automatically collect respondent's username' on the form"
+    }
     var username = evt.namedValues["Username"].toString();
     var recipients = this._getRecipients();
     var subject = this._getSubject();
@@ -112,7 +116,10 @@
    * -----------------------
    *
    * A private helper method that adds keys to `evt.namedValues` object so it
-   * can be used by a Handlebars template.
+   * can be used by a Handlebars template. This method also attempts to correct
+   * the order of the columns by looking at the order of the columns in the
+   * spreadsheet. The namedValues object is not an array and therefore has no
+   * order.
    *
    * Turns
    *
@@ -125,10 +132,16 @@
    */
   GoogleFormNotifier._transformNamedValues = function(namedValues) {
     var ret = [];
+    var columnCount = 0;
+    // count the number of columns
     for (prop in namedValues) {
       if (namedValues.hasOwnProperty(prop)) {
-        ret.push({column:prop, value:namedValues[prop]});
+        columnCount++;
       }
+    }
+    var header = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0].getRange(1, 1, 1, columnCount).getValues();
+    for (i in header[0]) {
+      ret.push({column:header[0][i], value:namedValues[header[0][i]]});
     }
     return {"formData":ret};
   };
